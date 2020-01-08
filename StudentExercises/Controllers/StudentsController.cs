@@ -33,61 +33,12 @@ namespace StudentExercises.Controllers
         [HttpGet]
         public async Task<IActionResult> Get()
         {
-            using (SqlConnection conn = Connection)
-            {
-                conn.Open();
-                using (SqlCommand cmd = conn.CreateCommand())
-                {
-                    cmd.CommandText = "SELECT s.id, s.first_name, s.last_name, s.slack_handle, c.id AS cohort_id, c.cohort_name AS cohort_name,  e.id AS exercise_id, e.exercise_name, e.exercise_language FROM student s LEFT JOIN student_exercise se ON se.student_id = s.id LEFT JOIN exercise e ON e.id = se.exercise_id LEFT JOIN cohort c ON s.cohort_id = c.id";
-                    SqlDataReader reader = await cmd.ExecuteReaderAsync();
-                    List<Student> students = new List<Student>();
-
-                    while (reader.Read())
-                    {
-                        bool studentExistsAlready = students.Any(s => s.Id == reader.GetInt32(reader.GetOrdinal("id")));
-                        if (!studentExistsAlready)
-                        {
-                            Student student = new Student
-                            {
-                                Id = reader.GetInt32(reader.GetOrdinal("id")),
-                                FirstName = reader.GetString(reader.GetOrdinal("first_name")),
-                                LastName = reader.GetString(reader.GetOrdinal("last_name")),
-                                SlackHandle = reader.GetString(reader.GetOrdinal("slack_handle")),
-                                CohortId = reader.GetInt32(reader.GetOrdinal("cohort_id")),
-                                Cohort = new Cohort()
-                                {
-                                    Id = reader.GetInt32(reader.GetOrdinal("cohort_id")),
-                                    CohortName = reader.GetString(reader.GetOrdinal("cohort_name")),
-                                    Students = new List<Student>(),
-                                    Instructors = new List<Instructor>()
-                                },
-                                Exercises = new List<Exercise>()
-                            };
-                            student.Exercises.Add(new Exercise()
-                            {
-                                Id = reader.GetInt32(reader.GetOrdinal("exercise_id")),
-                                ExerciseName = reader.GetString(reader.GetOrdinal("exercise_name")),
-                                ExerciseLanguage = reader.GetString(reader.GetOrdinal("exercise_language"))
-                            });
-                            students.Add(student);
-                        } 
-                        else {
-                            students.Single(s => s.Id == reader.GetInt32(reader.GetOrdinal("id"))).Exercises.Add(new Exercise()
-                            {
-                                Id = reader.GetInt32(reader.GetOrdinal("exercise_id")),
-                                ExerciseName = reader.GetString(reader.GetOrdinal("exercise_name")),
-                                ExerciseLanguage = reader.GetString(reader.GetOrdinal("exercise_language"))
-                            });
-                        }
-                    }
-                    reader.Close();
-
-                    return Ok(students);
-                }
-            }
+            List<Student> studentList = await allStudentsList();
+            return Ok(studentList);
         }
+        
 
-        // [HttpGet("{id}", Name = "GetExercise")]
+        // [HttpGet("{id}", Name = "GetStudent")]
         // public async Task<IActionResult> Get([FromRoute] int id)
         // {
         //     using (SqlConnection conn = Connection)
@@ -216,6 +167,62 @@ namespace StudentExercises.Controllers
         //         }
         //     }
         // }
+
+        public async Task<List<Student>> allStudentsList()
+        {
+            using (SqlConnection conn = Connection)
+            {
+                conn.Open();
+                using (SqlCommand cmd = conn.CreateCommand())
+                {
+                    cmd.CommandText = "SELECT s.id, s.first_name, s.last_name, s.slack_handle, c.id AS cohort_id, c.cohort_name AS cohort_name,  e.id AS exercise_id, e.exercise_name, e.exercise_language FROM student s LEFT JOIN student_exercise se ON se.student_id = s.id LEFT JOIN exercise e ON e.id = se.exercise_id LEFT JOIN cohort c ON s.cohort_id = c.id";
+                    SqlDataReader reader = await cmd.ExecuteReaderAsync();
+                    List<Student> students = new List<Student>();
+
+                    while (reader.Read())
+                    {
+                        bool studentExistsAlready = students.Any(s => s.Id == reader.GetInt32(reader.GetOrdinal("id")));
+                        if (!studentExistsAlready)
+                        {
+                            Student student = new Student
+                            {
+                                Id = reader.GetInt32(reader.GetOrdinal("id")),
+                                FirstName = reader.GetString(reader.GetOrdinal("first_name")),
+                                LastName = reader.GetString(reader.GetOrdinal("last_name")),
+                                SlackHandle = reader.GetString(reader.GetOrdinal("slack_handle")),
+                                CohortId = reader.GetInt32(reader.GetOrdinal("cohort_id")),
+                                Cohort = new Cohort()
+                                {
+                                    Id = reader.GetInt32(reader.GetOrdinal("cohort_id")),
+                                    CohortName = reader.GetString(reader.GetOrdinal("cohort_name")),
+                                    Students = new List<Student>(),
+                                    Instructors = new List<Instructor>()
+                                },
+                                Exercises = new List<Exercise>()
+                            };
+                            student.Exercises.Add(new Exercise()
+                            {
+                                Id = reader.GetInt32(reader.GetOrdinal("exercise_id")),
+                                ExerciseName = reader.GetString(reader.GetOrdinal("exercise_name")),
+                                ExerciseLanguage = reader.GetString(reader.GetOrdinal("exercise_language"))
+                            });
+                            students.Add(student);
+                        } 
+                        else {
+                            students.Single(s => s.Id == reader.GetInt32(reader.GetOrdinal("id"))).Exercises.Add(new Exercise()
+                            {
+                                Id = reader.GetInt32(reader.GetOrdinal("exercise_id")),
+                                ExerciseName = reader.GetString(reader.GetOrdinal("exercise_name")),
+                                ExerciseLanguage = reader.GetString(reader.GetOrdinal("exercise_language"))
+                            });
+                        }
+                    }
+                    reader.Close();
+
+                    return students;
+                }
+            }
+        }
 
         private bool StudentExists(int id)
         {

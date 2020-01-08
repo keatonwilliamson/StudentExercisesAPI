@@ -34,33 +34,6 @@ namespace StudentExercises.Controllers
         public async Task<IActionResult> Get()
         {
             List<Exercise> exerciseList = await ExerciseList();
-            // using (SqlConnection conn = Connection)
-            // {
-            //     conn.Open();
-            //     using (SqlCommand cmd = conn.CreateCommand())
-            //     {
-            //         cmd.CommandText = "SELECT id, exercise_name, exercise_language FROM exercise";
-            //         SqlDataReader reader = await cmd.ExecuteReaderAsync();
-            //         List<Exercise> exercises = new List<Exercise>();
-
-            //         while (reader.Read())
-            //         {
-            //             Exercise exercise = new Exercise
-            //             {
-            //                 Id = reader.GetInt32(reader.GetOrdinal("id")),
-            //                 ExerciseName = reader.GetString(reader.GetOrdinal("exercise_name")),
-            //                 ExerciseLanguage = reader.GetString(reader.GetOrdinal("exercise_language"))
-            //             };
-
-            //             exercises.Add(exercise);
-            //         }
-            //         reader.Close();
-
-            //         return Ok(exercises);
-            //     }
-            // }
-            // List<String> returnedExercises = new List<String>();
-            // returnedExercises.Add("HEY");
             return Ok(exerciseList);
         }
 
