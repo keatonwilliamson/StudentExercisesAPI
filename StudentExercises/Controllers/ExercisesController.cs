@@ -33,31 +33,35 @@ namespace StudentExercises.Controllers
         [HttpGet]
         public async Task<IActionResult> Get()
         {
-            using (SqlConnection conn = Connection)
-            {
-                conn.Open();
-                using (SqlCommand cmd = conn.CreateCommand())
-                {
-                    cmd.CommandText = "SELECT id, exercise_name, exercise_language FROM exercise";
-                    SqlDataReader reader = await cmd.ExecuteReaderAsync();
-                    List<Exercise> exercises = new List<Exercise>();
+            List<Exercise> exerciseList = await ExerciseList();
+            // using (SqlConnection conn = Connection)
+            // {
+            //     conn.Open();
+            //     using (SqlCommand cmd = conn.CreateCommand())
+            //     {
+            //         cmd.CommandText = "SELECT id, exercise_name, exercise_language FROM exercise";
+            //         SqlDataReader reader = await cmd.ExecuteReaderAsync();
+            //         List<Exercise> exercises = new List<Exercise>();
 
-                    while (reader.Read())
-                    {
-                        Exercise exercise = new Exercise
-                        {
-                            Id = reader.GetInt32(reader.GetOrdinal("id")),
-                            ExerciseName = reader.GetString(reader.GetOrdinal("exercise_name")),
-                            ExerciseLanguage = reader.GetString(reader.GetOrdinal("exercise_language"))
-                        };
+            //         while (reader.Read())
+            //         {
+            //             Exercise exercise = new Exercise
+            //             {
+            //                 Id = reader.GetInt32(reader.GetOrdinal("id")),
+            //                 ExerciseName = reader.GetString(reader.GetOrdinal("exercise_name")),
+            //                 ExerciseLanguage = reader.GetString(reader.GetOrdinal("exercise_language"))
+            //             };
 
-                        exercises.Add(exercise);
-                    }
-                    reader.Close();
+            //             exercises.Add(exercise);
+            //         }
+            //         reader.Close();
 
-                    return Ok(exercises);
-                }
-            }
+            //         return Ok(exercises);
+            //     }
+            // }
+            // List<String> returnedExercises = new List<String>();
+            // returnedExercises.Add("HEY");
+            return Ok(exerciseList);
         }
 
         [HttpGet("{id}", Name = "GetExercise")]
@@ -108,7 +112,7 @@ namespace StudentExercises.Controllers
                     cmd.Parameters.Add(new SqlParameter("@exerciseName", exercise.ExerciseName));
                     cmd.Parameters.Add(new SqlParameter("@exerciseLanguage", exercise.ExerciseLanguage));
 
-                    int newId = (int) await cmd.ExecuteScalarAsync();
+                    int newId = (int)await cmd.ExecuteScalarAsync();
                     exercise.Id = newId;
                     return CreatedAtRoute("GetExercise", new { id = newId }, exercise);
                 }
@@ -205,6 +209,33 @@ namespace StudentExercises.Controllers
 
                     SqlDataReader reader = cmd.ExecuteReader();
                     return reader.Read();
+                }
+            }
+        }
+        public async Task<List<Exercise>> ExerciseList()
+        {
+            using (SqlConnection conn = Connection)
+            {
+                conn.Open();
+                using (SqlCommand cmd = conn.CreateCommand())
+                {
+                    cmd.CommandText = "SELECT id, exercise_name, exercise_language FROM exercise";
+                    SqlDataReader reader = await cmd.ExecuteReaderAsync();
+                    List<Exercise> exercises = new List<Exercise>();
+                    while (reader.Read())
+                    {
+                        Exercise exercise = new Exercise
+                        {
+                            Id = reader.GetInt32(reader.GetOrdinal("id")),
+                            ExerciseName = reader.GetString(reader.GetOrdinal("exercise_name")),
+                            ExerciseLanguage = reader.GetString(reader.GetOrdinal("exercise_language"))
+                        };
+
+                        exercises.Add(exercise);
+                    }
+                    reader.Close();
+
+                    return exercises;
                 }
             }
         }
